@@ -1,2 +1,2 @@
 # CareerOS
-AI-Powered Opportunity Discovery Platform
+AI-Powered Opportunity Discovery Platform.
