@@ -1,0 +1,55 @@
+[
+  {
+    "adapter": "greenhouse",
+    "organization": "Stripe",
+    "board_token": "stripe",
+    "enabled": true
+  },
+  {
+    "adapter": "lever",
+    "organization": "Example Lever Company",
+    "site": "replace-with-lever-site",
+    "region": "global",
+    "enabled": false
+  },
+  {
+    "adapter": "ashby",
+    "organization": "Example Ashby Company",
+    "job_board_name": "replace-with-ashby-board-name",
+    "include_compensation": true,
+    "enabled": false
+  },
+  {
+    "adapter": "smartrecruiters",
+    "organization": "Example SmartRecruiters Company",
+    "company_identifier": "replace-with-company-identifier",
+    "api_key": "env:SMARTRECRUITERS_API_KEY",
+    "enabled": false
+  },
+  {
+    "adapter": "workable",
+    "organization": "Example Workable Company",
+    "subdomain": "replace-with-workable-subdomain",
+    "api_token": "env:WORKABLE_API_TOKEN",
+    "enabled": false
+  },
+  {
+    "adapter": "recruitee",
+    "organization": "Example Recruitee Company",
+    "subdomain": "replace-with-recruitee-subdomain",
+    "enabled": false
+  },
+  {
+    "adapter": "bamboohr",
+    "organization": "Example BambooHR Company",
+    "company_domain": "replace-with-bamboohr-domain",
+    "api_key": "env:BAMBOOHR_API_KEY",
+    "enabled": false
+  },
+  {
+    "adapter": "generic_jsonld",
+    "organization": "Example Company",
+    "career_url": "https://example.com/careers",
+    "enabled": false
+  }
+]

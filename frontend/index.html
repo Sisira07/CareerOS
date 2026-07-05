@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerOS Opportunities</title>
+    <style>
+        :root {
+            font-family: Inter, system-ui, sans-serif;
+            color: #172033;
+            background: #f4f6fa;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        header {
+            padding: 42px 24px 28px;
+            color: white;
+            background: linear-gradient(135deg, #202a78, #6257d9);
+        }
+
+        header div,
+        main {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+        }
+
+        header p {
+            margin: 0;
+            color: #e7e8ff;
+        }
+
+        main {
+            padding: 24px 0 50px;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: 2fr repeat(3, minmax(150px, 1fr)) auto;
+            gap: 10px;
+            padding: 16px;
+            border: 1px solid #e1e5ee;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 14px 35px rgba(35, 45, 85, 0.07);
+        }
+
+        input,
+        select,
+        button {
+            min-height: 44px;
+            border-radius: 10px;
+            font: inherit;
+        }
+
+        input,
+        select {
+            width: 100%;
+            border: 1px solid #cfd5e1;
+            padding: 0 12px;
+            background: white;
+        }
+
+        button {
+            border: 0;
+            padding: 0 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .primary {
+            color: white;
+            background: #4d50c7;
+        }
+
+        .saved-toggle {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+        }
+
+        .saved-toggle input {
+            width: auto;
+            min-height: auto;
+        }
+
+        .status {
+            margin: 18px 2px;
+            color: #667085;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            min-height: 310px;
+            padding: 22px;
+            border: 1px solid #e1e5ee;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 12px 28px rgba(35, 45, 85, 0.06);
+        }
+
+        .card h2 {
+            margin: 0 0 6px;
+            font-size: 1.25rem;
+        }
+
+        .organization {
+            margin: 0;
+            font-weight: 650;
+            color: #4d50c7;
+        }
+
+        .meta {
+            margin: 9px 0 16px;
+            color: #737b8f;
+            font-size: 0.92rem;
+        }
+
+        .summary {
+            margin: 0 0 17px;
+            line-height: 1.55;
+            color: #414a5d;
+        }
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-bottom: 18px;
+        }
+
+        .skill {
+            padding: 6px 9px;
+            border-radius: 999px;
+            background: #eff0ff;
+            color: #3d42a1;
+            font-size: 0.82rem;
+            font-weight: 650;
+        }
+
+        .actions {
+            display: flex;
+            gap: 9px;
+            margin-top: auto;
+        }
+
+        .actions a,
+        .actions button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            border-radius: 9px;
+            padding: 0 13px;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .view {
+            color: white;
+            background: #4d50c7;
+        }
+
+        .save {
+            color: #30374a;
+            background: #edf0f5;
+        }
+
+        .save.is-saved {
+            color: #754a00;
+            background: #fff0c6;
+        }
+
+        .empty {
+            grid-column: 1 / -1;
+            padding: 48px;
+            text-align: center;
+            border: 1px dashed #cbd1dd;
+            border-radius: 16px;
+            color: #71798b;
+            background: white;
+        }
+
+        @media (max-width: 850px) {
+            .filters,
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div>
+        <h1>CareerOS</h1>
+        <p>Search, filter, review, and save enriched opportunities.</p>
+    </div>
+</header>
+
+<main>
+    <form id="filters" class="filters">
+        <input id="search" type="search" placeholder="Search title, company, or summary">
+        <select id="category">
+            <option value="">All categories</option>
+        </select>
+        <select id="skill">
+            <option value="">All skills</option>
+        </select>
+        <select id="work-mode">
+            <option value="">All work modes</option>
+        </select>
+        <label class="saved-toggle">
+            <input id="saved-only" type="checkbox">
+            Saved only
+        </label>
+        <button class="primary" type="submit">Search</button>
+    </form>
+
+    <p id="status" class="status">Loading opportunities…</p>
+    <section id="opportunities" class="grid"></section>
+</main>
+
+<script>
+    const form = document.getElementById("filters");
+    const container = document.getElementById("opportunities");
+    const statusElement = document.getElementById("status");
+
+    const searchInput = document.getElementById("search");
+    const categorySelect = document.getElementById("category");
+    const skillSelect = document.getElementById("skill");
+    const workModeSelect = document.getElementById("work-mode");
+    const savedOnlyInput = document.getElementById("saved-only");
+
+    async function loadFilters() {
+        const response = await fetch("/api/filters");
+        if (!response.ok) return;
+
+        const filters = await response.json();
+        fillSelect(categorySelect, filters.categories);
+        fillSelect(skillSelect, filters.skills);
+        fillSelect(workModeSelect, filters.work_modes);
+    }
+
+    function fillSelect(select, values) {
+        for (const value of values || []) {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            select.appendChild(option);
+        }
+    }
+
+    function buildQuery() {
+        const params = new URLSearchParams();
+
+        if (searchInput.value.trim()) params.set("q", searchInput.value.trim());
+        if (categorySelect.value) params.set("category", categorySelect.value);
+        if (skillSelect.value) params.set("skill", skillSelect.value);
+        if (workModeSelect.value) params.set("work_mode", workModeSelect.value);
+        if (savedOnlyInput.checked) params.set("saved", "true");
+
+        return params.toString();
+    }
+
+    async function loadOpportunities() {
+        statusElement.textContent = "Loading opportunities…";
+        container.replaceChildren();
+
+        try {
+            const response = await fetch(`/api/opportunities?${buildQuery()}`);
+            if (!response.ok) throw new Error("Unable to load opportunities.");
+
+            const data = await response.json();
+            statusElement.textContent = `${data.total} opportunities found`;
+
+            if (data.items.length === 0) {
+                const empty = document.createElement("div");
+                empty.className = "empty";
+                empty.textContent = "No opportunities match these filters.";
+                container.appendChild(empty);
+                return;
+            }
+
+            data.items.forEach((opportunity) => {
+                container.appendChild(createCard(opportunity));
+            });
+        } catch (error) {
+            statusElement.textContent = error.message;
+        }
+    }
+
+    function createCard(opportunity) {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const title = document.createElement("h2");
+        title.textContent = opportunity.title;
+
+        const organization = document.createElement("p");
+        organization.className = "organization";
+        organization.textContent = opportunity.organization;
+
+        const meta = document.createElement("p");
+        meta.className = "meta";
+        meta.textContent = [
+            opportunity.location,
+            opportunity.work_mode,
+            opportunity.category,
+        ].filter(Boolean).join(" · ");
+
+        const summary = document.createElement("p");
+        summary.className = "summary";
+        summary.textContent = opportunity.summary || "No summary available.";
+
+        const skills = document.createElement("div");
+        skills.className = "skills";
+
+        for (const value of opportunity.skills || []) {
+            const skill = document.createElement("span");
+            skill.className = "skill";
+            skill.textContent = value;
+            skills.appendChild(skill);
+        }
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const saveButton = document.createElement("button");
+        saveButton.className = `save${opportunity.is_saved ? " is-saved" : ""}`;
+        saveButton.textContent = opportunity.is_saved ? "Saved" : "Save";
+        saveButton.addEventListener("click", async () => {
+            const nextState = !opportunity.is_saved;
+            const response = await fetch(
+                `/api/opportunities/${opportunity.id}/saved`,
+                {
+                    method: "PATCH",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({saved: nextState}),
+                }
+            );
+
+            if (response.ok) {
+                opportunity.is_saved = nextState;
+                saveButton.textContent = nextState ? "Saved" : "Save";
+                saveButton.classList.toggle("is-saved", nextState);
+
+                if (savedOnlyInput.checked && !nextState) {
+                    card.remove();
+                }
+            }
+        });
+
+        const viewLink = document.createElement("a");
+        viewLink.className = "view";
+        viewLink.href = opportunity.source_url;
+        viewLink.target = "_blank";
+        viewLink.rel = "noreferrer";
+        viewLink.textContent = "View opportunity";
+
+        actions.append(saveButton, viewLink);
+        card.append(title, organization, meta, summary, skills, actions);
+        return card;
+    }
+
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        loadOpportunities();
+    });
+
+    Promise.all([loadFilters(), loadOpportunities()]);
+</script>
+</body>
+</html>
