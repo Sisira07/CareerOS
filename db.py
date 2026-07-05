@@ -17,17 +17,16 @@ load_dotenv()
 def get_connection():
     database_url = os.getenv("DATABASE_URL")
 
-    if database_url:
-        return psycopg2.connect(database_url)
+    if not database_url:
+        raise RuntimeError(
+            "DATABASE_URL is missing from the environment."
+        )
 
     return psycopg2.connect(
-        dbname=os.getenv("DB_NAME", "careeros"),
-        user=os.getenv("DB_USER", "postgres"),
-        password=os.getenv("DB_PASSWORD"),
-        host=os.getenv("DB_HOST", "localhost"),
-        port=int(os.getenv("DB_PORT", "5432")),
+        database_url,
+        connect_timeout=10,
+        application_name="careeros",
     )
-
 
 @contextmanager
 def database_cursor() -> Iterator[tuple[Any, RealDictCursor]]:

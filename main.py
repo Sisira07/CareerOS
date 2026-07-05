@@ -1,18 +1,14 @@
 from __future__ import annotations
 
-from pathlib import Path
+import os
 
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Header, HTTPException, Query
 from pydantic import BaseModel
-from starlette.staticfiles import StaticFiles
 
 from db import get_filter_values, search_opportunities, set_saved
 from gemini_pipeline import process_pending
 
 
-BASE_DIR = Path(__file__).resolve().parent
-FRONTEND_DIR = BASE_DIR / "frontend"
 
 app = FastAPI(
     title="CareerOS Multi-Board API",
@@ -23,6 +19,22 @@ app = FastAPI(
 class SaveRequest(BaseModel):
     saved: bool
 
+def verify_admin_secret(
+    authorization: str | None,
+) -> None:
+    expected_secret = os.getenv("ADMIN_SECRET")
+
+    if not expected_secret:
+        raise HTTPException(
+            status_code=503,
+            detail="ADMIN_SECRET is not configured.",
+        )
+
+    if authorization != f"Bearer {expected_secret}":
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid admin credentials.",
+        )
 
 @app.get("/api/health")
 def health() -> dict[str, str]:
@@ -76,20 +88,16 @@ def update_saved(
 @app.post("/api/process")
 def process_opportunities(
     limit: int = Query(default=10, ge=1, le=100),
+    authorization: str | None = Header(default=None),
 ):
+    verify_admin_secret(authorization)
+
     try:
         return process_pending(limit)
     except RuntimeError as error:
-        raise HTTPException(status_code=503, detail=str(error)) from error
+        raise HTTPException(
+            status_code=503,
+            detail=str(error),
+        ) from error
 
 
-@app.get("/")
-def index():
-    return FileResponse(FRONTEND_DIR / "index.html")
-
-
-app.mount(
-    "/static",
-    StaticFiles(directory=FRONTEND_DIR),
-    name="static",
-)
