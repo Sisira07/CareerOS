@@ -3,6 +3,8 @@
 This project refactors a single Greenhouse collector into a reusable
 multi-board pipeline.
 
+Link to the website: https://career-esvsz7ru2-lane-asade.vercel.app/
+
 ## Supported adapters
 
 - Greenhouse
